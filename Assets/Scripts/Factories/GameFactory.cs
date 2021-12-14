@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameFactory : MonoBehaviour
+public class GameFactory
 {
     private GameController controller;
     private GameModel model;
