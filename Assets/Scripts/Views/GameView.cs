@@ -4,7 +4,18 @@ using UnityEngine;
 
 public class GameView : MonoBehaviour, IGameView
 {
-    public void Init() {
+    private SelectionController selectionController;
 
+    public RectTransform selectionBox;
+
+    private void Start() {
+        selectionController = new SelectionController();
+    }
+
+    public void Init() {
+    }
+
+    private void Update() {
+        selectionController.HandleSelectionInputs(selectionBox);
     }
 }
