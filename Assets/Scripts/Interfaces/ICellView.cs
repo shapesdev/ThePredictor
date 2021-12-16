@@ -6,4 +6,5 @@ public interface ICellView
 {
     void Select();
     void Deselect();
+    bool IsSelected();
 }
