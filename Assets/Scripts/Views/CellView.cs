@@ -17,4 +17,7 @@ public class CellView : MonoBehaviour, ICellView
     public void Deselect() {
         meshRenderer.material.color = Color.white;
     }
+    public bool IsSelected() {
+        return meshRenderer.material.color == Color.green ? true : false;
+    }
 }
