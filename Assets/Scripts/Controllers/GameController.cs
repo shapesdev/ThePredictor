@@ -6,8 +6,10 @@ public class GameController
 {
     private readonly IGameModel model;
     private readonly IGameView view;
+    private readonly IApp app;
 
-    public GameController(IGameModel model, IGameView view) {
+    public GameController(IApp app, IGameModel model, IGameView view) {
+        this.app = app;
         this.model = model;
         this.view = view;
         Init();

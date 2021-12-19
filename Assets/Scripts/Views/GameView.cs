@@ -6,11 +6,8 @@ public class GameView : MonoBehaviour, IGameView
 {
     private SelectionController selectionController;
 
-    private void Start() {
-        selectionController = new SelectionController();
-    }
-
     public void Init() {
+        selectionController = new SelectionController();
     }
 
     private void Update() {

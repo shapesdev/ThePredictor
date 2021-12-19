@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class SelectionController
 {
-    private List<ICellView> cells;
+    private List<ICellView> selectedCells;
     private ICellView currentCell = null;
     private Vector3 lastPoint;
 
     public SelectionController() {
-        cells = new List<ICellView>();
+        selectedCells = new List<ICellView>();
         currentCell = null;
         lastPoint = Vector3.zero;
     }
 
-    public void HandleSelectionInputs() {
+    public List<ICellView> HandleSelectionInputs() {
         if (Input.GetMouseButton(0) && lastPoint != Input.mousePosition) {
             lastPoint = Input.mousePosition;
             Ray ray = Camera.main.ScreenPointToRay(lastPoint);
@@ -30,13 +30,18 @@ public class SelectionController
         if(Input.GetKeyDown(KeyCode.Escape)) {
             DeselectAll();
         }
+        if(Input.GetMouseButtonUp(0)) {
+            Debug.Log("Releasing");
+            return selectedCells;
+        }
+        return null;
     }
 
     private void SelectCell(RaycastHit hit) {
         var cell = hit.transform.gameObject.GetComponent<ICellView>();
         if(cell != currentCell) {
-            if(!cells.Contains(cell)) {
-                cells.Add(cell);
+            if(!selectedCells.Contains(cell)) {
+                selectedCells.Add(cell);
                 cell.Select();
             }
             else if(!cell.IsSelected()) {
@@ -47,7 +52,7 @@ public class SelectionController
     }
 
     private void DeselectAll() {
-        foreach(var cell in cells) {
+        foreach(var cell in selectedCells) {
             cell.Deselect();
         }
         currentCell = null;
