@@ -14,7 +14,7 @@ public class Cell
         this.cellCommand = cellCommand;
     }
 
-    public void Execute() {
+    public void ExecuteCommandOnCell() {
         if(cellCommand != null) {
             cellCommand.Execute();
         }
