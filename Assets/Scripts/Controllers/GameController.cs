@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class GameController
 {
@@ -16,7 +17,14 @@ public class GameController
     }
 
     private void Init() {
+        /*        model.Init();
+                view.Init();*/
+
         model.Init();
-        view.Init();
+        view.OnCellSelection += View_OnCellSelection;
+    }
+
+    private void View_OnCellSelection(object sender, CellSelectionEventArgs e) {
+        view.DisplayCommands();
     }
 }

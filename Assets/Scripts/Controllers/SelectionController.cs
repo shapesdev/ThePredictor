@@ -31,7 +31,6 @@ public class SelectionController
             DeselectAll();
         }
         if(Input.GetMouseButtonUp(0)) {
-            Debug.Log("Releasing");
             return selectedCells;
         }
         return null;
@@ -51,10 +50,11 @@ public class SelectionController
         }
     }
 
-    private void DeselectAll() {
+    public void DeselectAll() {
         foreach(var cell in selectedCells) {
             cell.Deselect();
         }
+        selectedCells.Clear();
         currentCell = null;
     }
 }

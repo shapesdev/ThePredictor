@@ -7,4 +7,5 @@ using System.Threading.Tasks;
 public interface IGameModel
 {
     void Init();
+    IEnumerable<ICellCommand> GetPossibleCommands();
 }
