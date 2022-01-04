@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class SelectionController
 {
-    private List<ICellView> selectedCells;
-    private ICellView currentCell = null;
+    private List<ICell> selectedCells;
+    private ICell currentCell = null;
     private Vector3 lastPoint;
 
     public SelectionController() {
-        selectedCells = new List<ICellView>();
+        selectedCells = new List<ICell>();
         currentCell = null;
         lastPoint = Vector3.zero;
     }
 
-    public List<ICellView> HandleSelectionInputs() {
+    public List<ICell> HandleSelectionInputs() {
         if (Input.GetMouseButton(0) && lastPoint != Input.mousePosition) {
             lastPoint = Input.mousePosition;
             Ray ray = Camera.main.ScreenPointToRay(lastPoint);
@@ -37,7 +37,7 @@ public class SelectionController
     }
 
     private void SelectCell(RaycastHit hit) {
-        var cell = hit.transform.gameObject.GetComponent<ICellView>();
+        var cell = hit.transform.gameObject.GetComponent<ICell>();
         if(cell != currentCell) {
             if(!selectedCells.Contains(cell)) {
                 selectedCells.Add(cell);

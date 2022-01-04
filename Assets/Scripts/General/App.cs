@@ -6,6 +6,8 @@ public class App : MonoBehaviour, IApp
 {
     [SerializeField]
     private GameObject gamePrefab;
+    [SerializeField]
+    private Cell cell;
 
     private IFactory gameFactory;
 
@@ -14,7 +16,8 @@ public class App : MonoBehaviour, IApp
     }
 
     private void Init() {
-        gameFactory = new GameFactory();
+        gameFactory = new GameFactory(cell);
+        LoadGame();
     }
 
     public void LoadGame() {

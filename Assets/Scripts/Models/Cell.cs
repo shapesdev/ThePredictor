@@ -2,12 +2,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Cell
+public class Cell : MonoBehaviour, ICell
 {
     private ICellCommand cellCommand;
+    private MeshRenderer meshRenderer;
 
-    public Cell() {
+    private void Start()
+    {
+        meshRenderer = GetComponent<MeshRenderer>();
+        cellCommand = null;
+    }
 
+    public void Select()
+    {
+        meshRenderer.material.color = Color.green;
+    }
+
+    public void Deselect()
+    {
+        meshRenderer.material.color = Color.white;
+    }
+    public bool IsSelected()
+    {
+        return meshRenderer.material.color == Color.green ? true : false;
     }
 
     public void SetCommand(ICellCommand cellCommand) {
