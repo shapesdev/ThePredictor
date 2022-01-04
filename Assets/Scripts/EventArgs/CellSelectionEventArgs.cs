@@ -5,9 +5,9 @@ using System;
 
 public class CellSelectionEventArgs : EventArgs
 {
-    public IEnumerable<ICellView> SelectedCells { get; }
+    public IEnumerable<ICell> SelectedCells { get; }
 
-    public CellSelectionEventArgs(IEnumerable<ICellView> selectedCells) {
+    public CellSelectionEventArgs(IEnumerable<ICell> selectedCells) {
         SelectedCells = selectedCells;
     }
 }

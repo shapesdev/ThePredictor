@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ICellView 
+public interface ICell 
 {
     void Select();
     void Deselect();

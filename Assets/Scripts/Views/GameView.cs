@@ -12,24 +12,15 @@ public class GameView : MonoBehaviour, IGameView
     public event EventHandler<CellSelectionEventArgs> OnCellSelection;
 
     private SelectionController selectionController;
-    private GameController gameController;
 
-    // FOR NOW HAVING START METHOD
-    private void Start() {
-        Init();
-    }
-
-    public void Init() {
+    public void Init(IEnumerable<ICellCommand> possibleCommands) {
         selectionController = new SelectionController();
-        var model = new GameModel();
-        gameController = new GameController(null, model, this);
-
         int current = 0;
-        foreach(var cmd in model.GetPossibleCommands()) {
+
+        foreach(var cmd in possibleCommands) {
             commandButtons[current].onClick.AddListener(() => cmd.Execute());
-            commandButtons[current].onClick.AddListener(() => ClearSelections());
+            commandButtons[current].onClick.AddListener(() => DisableCommandButtons());
             commandButtons[current].GetComponentInChildren<Text>().text = cmd.GetCommandName();
-            commandButtons[current].gameObject.SetActive(false);
             current++;
         }
     }
@@ -43,16 +34,12 @@ public class GameView : MonoBehaviour, IGameView
         }
     }
 
-    public void DisplayCommands() {
-        foreach(var btn in commandButtons) {
-            btn.gameObject.SetActive(true);
-        }
+    public void EnableCommandButtons() {
+        commandButtons[0].transform.parent.gameObject.SetActive(true);
     }
 
-    private void ClearSelections() {
+    private void DisableCommandButtons() {
         selectionController.DeselectAll();
-        foreach (var btn in commandButtons) {
-            btn.gameObject.SetActive(false);
-        }
+        commandButtons[0].transform.parent.gameObject.SetActive(false);
     }
 }

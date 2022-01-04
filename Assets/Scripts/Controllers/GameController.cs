@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class GameController
+public class GameController : IGameController
 {
     private readonly IGameModel model;
     private readonly IGameView view;
@@ -13,18 +13,15 @@ public class GameController
         this.app = app;
         this.model = model;
         this.view = view;
-        Init();
     }
 
-    private void Init() {
-        /*        model.Init();
-                view.Init();*/
-
+    public void Init() {
         model.Init();
+        view.Init(model.GetPossibleCommands());
         view.OnCellSelection += View_OnCellSelection;
     }
 
     private void View_OnCellSelection(object sender, CellSelectionEventArgs e) {
-        view.DisplayCommands();
+        view.EnableCommandButtons();
     }
 }

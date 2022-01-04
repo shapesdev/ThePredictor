@@ -5,7 +5,7 @@ using System;
 
 public interface IGameView
 {
-    void Init();
-    void DisplayCommands();
+    void Init(IEnumerable<ICellCommand> possibleCommands);
+    void EnableCommandButtons();
     event EventHandler<CellSelectionEventArgs> OnCellSelection;
 }
