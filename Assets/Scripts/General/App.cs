@@ -2,29 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class App : MonoBehaviour, IApp
+public class App : MonoBehaviour
 {
     [SerializeField]
-    private GameObject gamePrefab;
-    [SerializeField]
-    private Cell cell;
-
-    private IFactory gameFactory;
-
-    private void Awake() {
-        Init();
-    }
-
-    private void Init() {
-        gameFactory = new GameFactory(cell);
-        LoadGame();
-    }
+    private GameManager gameManager;
 
     public void LoadGame() {
-        gameFactory.Load(this, gamePrefab);
+
     }
 
     public void LoadMainMenu() {
-        gameFactory.Unload();
+
     }
 }

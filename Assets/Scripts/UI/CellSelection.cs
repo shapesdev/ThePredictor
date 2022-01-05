@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SelectionController
+public class CellSelection
 {
     private List<ICell> selectedCells;
     private ICell currentCell = null;
     private Vector3 lastPoint;
 
-    public SelectionController() {
+    public CellSelection() {
         selectedCells = new List<ICell>();
         currentCell = null;
         lastPoint = Vector3.zero;
     }
 
-    public List<ICell> HandleSelectionInputs() {
+    public List<ICell> GetSelectedCells() {
         if (Input.GetMouseButton(0) && lastPoint != Input.mousePosition) {
             lastPoint = Input.mousePosition;
             Ray ray = Camera.main.ScreenPointToRay(lastPoint);
