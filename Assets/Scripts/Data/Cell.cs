@@ -31,7 +31,7 @@ public class Cell : MonoBehaviour, ICell
         this.cellCommand = cellCommand;
     }
 
-    public void ExecuteCommandOnCell() {
+    public void ExecuteCommand() {
         if(cellCommand != null) {
             cellCommand.Execute();
         }

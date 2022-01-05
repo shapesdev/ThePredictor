@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IFactory
+public interface ISequence
 {
-    void Load(IApp app, GameObject go);
-    void Unload();
+    void Start();
+    void Stop();
 }
