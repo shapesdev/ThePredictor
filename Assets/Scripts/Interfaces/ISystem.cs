@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ISequence : IInitialize
+public interface ISystem : IInitialize
 {
 
 }

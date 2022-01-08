@@ -6,48 +6,64 @@ using System;
 public class PlanningSequence : MonoBehaviour, ISequence
 {
     [SerializeField]
-    private PlanningPhaseMenu planningPhaseMenu;
-
+    private PlanningPhaseUI planningPhaseUI;
     private CellSelection cellSelection;
-    private List<ICellCommand> cellCommands;
 
-    public void Start()
+    public void Init()
     {
         gameObject.SetActive(true);
-        cellCommands = new List<ICellCommand>();
+
         cellSelection = new CellSelection();
 
-        cellCommands.Add(new JumpCommand());
-        cellCommands.Add(new SlideCommand());
-        cellCommands.Add(new StopCommand());
-        cellCommands.Add(new WalkCommand());
-        cellCommands.Add(new RunCommand());
+        StartCoroutine(CheckCellSelections());
+        planningPhaseUI.Init(new List<ICellCommand>() {
+        new JumpCommand(),
+        new SlideCommand(),
+        new StopCommand(),
+        new WalkCommand(),
+        new RunCommand()
+        });
 
-        planningPhaseMenu.Init(cellCommands);
+        planningPhaseUI.OnGetPressedCommand += PlanningPhaseUI_OnGetPressedCommand;
     }
 
-    public void Stop()
+    public void Terminate()
     {
         gameObject.SetActive(false);
     }
 
-    public void Update()
-    {
-        var selectedCells = cellSelection.GetSelectedCells();
-        if (selectedCells != null && selectedCells.Count > 0)
-        {
-            EnableCommandButtons();
+    private void Update() {
+        if(Input.GetKeyDown(KeyCode.Escape)) {
+            DisableCommandButtons();
         }
     }
 
-    private void EnableCommandButtons()
-    {
-        planningPhaseMenu.gameObject.SetActive(true);
+    private IEnumerator CheckCellSelections() {
+        while(true) {
+            yield return null;
+            var selectedCells = cellSelection.GetSelectedCells();
+            if (selectedCells != null && selectedCells.Count > 0) {
+                EnableCommandButtons();
+                break;
+            }
+        }
     }
 
-    public void DisableCommandButtons()
-    {
+    private void PlanningPhaseUI_OnGetPressedCommand(ICellCommand cmd) {
+        var selectedCells = cellSelection.GetSelectedCells();
+        foreach(var cell in selectedCells) {
+            cell.SetCommand(cmd);
+        }
+        DisableCommandButtons();
+    }
+
+    private void EnableCommandButtons() {
+        planningPhaseUI.gameObject.SetActive(true);
+    }
+
+    public void DisableCommandButtons() {
         cellSelection.DeselectAll();
-        planningPhaseMenu.gameObject.SetActive(false);
+        planningPhaseUI.gameObject.SetActive(false);
+        StartCoroutine(CheckCellSelections());
     }
 }
