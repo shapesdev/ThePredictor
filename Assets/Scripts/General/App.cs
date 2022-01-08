@@ -5,13 +5,9 @@ using UnityEngine;
 public class App : MonoBehaviour
 {
     [SerializeField]
-    private GameManager gameManager;
+    private GameSystem gameSystem;
 
-    public void LoadGame() {
-
-    }
-
-    public void LoadMainMenu() {
-
+    void Awake() {
+        gameSystem.Init();
     }
 }

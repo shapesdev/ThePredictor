@@ -4,20 +4,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlanningPhaseMenu : MonoBehaviour
+public class PlanningPhaseUI : MonoBehaviour
 {
     [SerializeField]
     private Button[] commandButtons;
 
-    public void Init(List<ICellCommand> cellCommands)
+    public event Action<ICellCommand> OnGetPressedCommand;
+
+    public void Init(IEnumerable<ICellCommand> cellCommands)
     {
         int current = 0;
 
         foreach (var cmd in cellCommands)
         {
-            commandButtons[current].onClick.AddListener(() => cmd.Execute());
+            commandButtons[current].onClick.AddListener(() => UpdateCurrentCommand(cmd));
             commandButtons[current].GetComponentInChildren<Text>().text = cmd.GetCommandName();
             current++;
         }
+    }
+
+    private void UpdateCurrentCommand(ICellCommand cellCommand) {
+        OnGetPressedCommand(cellCommand);
     }
 }
