@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ICellCommand 
+public interface IInitialize
 {
-    void Execute();
-    string GetCommandName();
+    void Init();
+    void Terminate();
 }

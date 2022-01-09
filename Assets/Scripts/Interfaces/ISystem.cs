@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ICellCommand 
+public interface ISystem : IInitialize
 {
-    void Execute();
-    string GetCommandName();
+
 }

@@ -5,15 +5,9 @@ using UnityEngine;
 public class App : MonoBehaviour
 {
     [SerializeField]
-    private GameObject gamePrefab;
+    private GameSystem gameSystem;
 
-    private GameFactory gameFactory;
-
-    private void Awake() {
-        Init();
-    }
-
-    private void Init() {
-        gameFactory = new GameFactory();
+    void Awake() {
+        gameSystem.Init();
     }
 }
