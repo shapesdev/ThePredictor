@@ -1422,20 +1422,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftPanel:
     xOffset: 0
-    yOffset: 50
+    yOffset: 100
     width: 110
-    height: 721
+    height: 1000
     buttonWidth: 100
     buttonHeight: 100
     offsetBetweenButtons: 5
   topPanel:
-    xOffset: 0
-    yOffset: 40
-    width: 100
-    height: 400
+    xOffset: 200
+    yOffset: 0
+    width: 430
+    height: 1012
     buttonWidth: 100
     buttonHeight: 100
     offsetBetweenButtons: 5
+  leftButtons:
+  - name: Static
+    selected: 0
+  - name: Moving
+    selected: 0
+  - name: Active
+    selected: 0
+  - name: Other
+    selected: 0
 --- !u!4 &1633510013
 Transform:
   m_ObjectHideFlags: 0
