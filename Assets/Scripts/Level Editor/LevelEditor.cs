@@ -3,6 +3,13 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+[System.Serializable]
+public struct Buttons
+{
+    public string name;
+    public bool selected;
+}
+
 public class LevelEditor : MonoBehaviour
 {
     [Header("GUI Settings")]
@@ -10,6 +17,8 @@ public class LevelEditor : MonoBehaviour
     private LeftPanel leftPanel;
     [SerializeField]
     private TopPanel topPanel;
+
+    public Buttons[] leftButtons;
 
     public LeftPanel GetLeftPanel() {
         return leftPanel;
