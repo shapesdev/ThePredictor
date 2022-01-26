@@ -12,9 +12,9 @@ public class LevelEditorWindow : ExtendedEditorWindow
 
     private static void LoadSerializedObject() {
         LevelEditorWindow window = GetWindow<LevelEditorWindow>("Level Editor");
-        var data = AssetFinder.GetAllInstances<LevelEditorData>();
-        settings = data[0].sceneGUISettings;
-        window.serializedObject = new SerializedObject(data[0]);
+        var data = AssetUtils.GetInstance<LevelEditorData>();
+        settings = data.sceneGUISettings;
+        window.serializedObject = new SerializedObject(data);
     }
 
     private void OnGUI() {
@@ -33,13 +33,15 @@ public class LevelEditorWindow : ExtendedEditorWindow
 
     private void OnDisable() {
         SceneView.duringSceneGui -= OnSceneGUI;
+        GameObjectUtils.Clear();
     }
 
     private void OnSceneGUI(SceneView obj) {
         Handles.BeginGUI();
 
-        DrawLeftPanel();
-        DrawTopPanel();
+        DrawCategoriesPanel();
+        DrawSelectionPanel();
+        DrawSaveButton();
 
         Handles.EndGUI();
     }
