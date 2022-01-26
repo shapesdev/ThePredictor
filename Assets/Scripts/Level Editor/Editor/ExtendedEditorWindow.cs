@@ -26,7 +26,7 @@ public class ExtendedEditorWindow : EditorWindow
 
     #region Scene GUI
 
-    protected void DrawLeftPanel() {
+    protected void DrawCategoriesPanel() {
         var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
         var panel = settings.leftPanel;
 
@@ -67,7 +67,7 @@ public class ExtendedEditorWindow : EditorWindow
         btn.selected = !btn.selected;
     }
 
-    protected void DrawTopPanel() {
+    protected void DrawSelectionPanel() {
         var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
         var panel = settings.topPanel;
 
@@ -98,7 +98,7 @@ public class ExtendedEditorWindow : EditorWindow
 
             if (GUILayout.Button(btn.name, GUILayout.Height(btn.height),
                 GUILayout.Width(btn.width))) {
-                // Method
+                GameObjectUtils.AddGameObject(btn.name + " GameObject");
             }
             GUILayout.Space(panel.buttonOffset);
         }
@@ -106,6 +106,15 @@ public class ExtendedEditorWindow : EditorWindow
         GUILayout.EndHorizontal();
         GUILayout.Space(panel.buttonOffset);
         EditorGUILayout.EndVertical();
+        GUILayout.EndArea();
+    }
+
+    protected void DrawSaveButton() {
+        var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
+        GUILayout.BeginArea(new Rect(pixelRect.width - 80, pixelRect.height - 80, 80, 80));
+        if (GUILayout.Button("Save", GUILayout.Height(80), GUILayout.Width(80))) {
+            GameObjectUtils.Save();
+        }
         GUILayout.EndArea();
     }
 
