@@ -8,6 +8,8 @@ public class LevelEditorData : ScriptableObject
     public SceneGUISettings sceneGUISettings;
 }
 
+#region Classes
+
 [System.Serializable]
 public class SceneGUISettings
 {
@@ -32,3 +34,5 @@ public class Button_
     public int width;
     public int height;
 }
+
+#endregion
