@@ -118,5 +118,29 @@ public class ExtendedEditorWindow : EditorWindow
         GUILayout.EndArea();
     }
 
+    private Vector3 cellSize = new Vector3(2f, 0f, 2f);
+
+    protected void DisplayHandlesInScene() {
+        // Get the mouse position in world space such as y = 0
+        Ray guiRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+        Vector3 mousePosition = guiRay.origin - guiRay.direction * (guiRay.origin.y / guiRay.direction.y);
+
+        // Get the corresponding cell on our virtual grid
+        Vector3Int cell = new Vector3Int(Mathf.RoundToInt(mousePosition.x / cellSize.x), 0,
+            Mathf.RoundToInt(mousePosition.z / cellSize.z));
+        Vector3 cellCenter = Vector3.Scale(cell, cellSize);
+
+        // Vertices of our square
+        Vector3 topLeft = cellCenter + Vector3.Scale(Vector3.left, cellSize) * 0.5f + Vector3.Scale(Vector3.forward, cellSize) * 0.5f;
+        Vector3 topRight = cellCenter - Vector3.Scale(Vector3.left, cellSize) * 0.5f + Vector3.Scale(Vector3.forward, cellSize) * 0.5f;
+        Vector3 bottomLeft = cellCenter + Vector3.Scale(Vector3.left, cellSize) * 0.5f - Vector3.Scale(Vector3.forward, cellSize) * 0.5f;
+        Vector3 bottomRight = cellCenter - Vector3.Scale(Vector3.left, cellSize) * 0.5f - Vector3.Scale(Vector3.forward, cellSize) * 0.5f;
+
+        // Rendering
+        Handles.color = Color.green;
+        Vector3[] lines = { topLeft, topRight, topRight, bottomRight, bottomRight, bottomLeft, bottomLeft, topLeft };
+        Handles.DrawLines(lines);
+    }
+
     #endregion
 }

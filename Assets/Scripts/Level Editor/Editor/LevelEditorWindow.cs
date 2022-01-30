@@ -5,6 +5,8 @@ using UnityEditor;
 
 public class LevelEditorWindow : ExtendedEditorWindow
 {
+    private bool paintMode = false;
+
     [MenuItem(itemName: "Shapes/Level Editor")]
     public static void Init() {
         LoadSerializedObject();
@@ -24,6 +26,8 @@ public class LevelEditorWindow : ExtendedEditorWindow
         currentProperty = serializedObject.FindProperty("sceneGUISettings");
         DrawProperties(currentProperty, true);
 
+        paintMode = GUILayout.Toggle(paintMode, "Start painting", "Button", GUILayout.Height(60f));
+
         serializedObject.ApplyModifiedProperties();
     }
 
@@ -37,12 +41,17 @@ public class LevelEditorWindow : ExtendedEditorWindow
     }
 
     private void OnSceneGUI(SceneView obj) {
-        Handles.BeginGUI();
+
+        if (paintMode) {
+            Event e = Event.current;
+            if(e.type == EventType.MouseMove) {
+                HandleUtility.Repaint();
+            }
+            DisplayHandlesInScene();
+        }
 
         DrawCategoriesPanel();
         DrawSelectionPanel();
         DrawSaveButton();
-
-        Handles.EndGUI();
     }
 }
