@@ -6,6 +6,9 @@ using UnityEngine;
 public class LevelEditorData : ScriptableObject
 {
     public SceneGUISettings sceneGUISettings;
+
+    public Vector3 cellSize = new Vector3(2f, 0f, 2f);
+    public bool paintMode = false;
 }
 
 #region Classes

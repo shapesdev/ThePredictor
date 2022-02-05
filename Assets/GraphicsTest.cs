@@ -30,9 +30,12 @@ public class GraphicsTest : MonoBehaviour
         Ray ray = HandleUtility.GUIPointToWorldRay(mousePosition);
         mousePosition = ray.origin;
         mousePosition.z = 0;
-        Debug.Log(mousePosition);
 
         Matrix4x4 matrix = Matrix4x4.TRS(mousePosition, rotation, scale);
+
+        Color color = new Color(104, 223, 248, 213);
+        var material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        material.SetColor("_BaseColor", color);
 
         Graphics.DrawMesh(mesh, matrix, material, 0);
     }

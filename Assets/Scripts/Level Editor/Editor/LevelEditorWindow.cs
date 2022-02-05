@@ -3,15 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+public enum CategoryType
+{
+    None = -1, Static, Moving, Active, Other
+}
+
+public class MapObject
+{
+    public Vector3 _position;
+    public GameObject _object;
+    public GUIContent content;
+
+    public MapObject(GameObject _object, GUIContent content) {
+        this._object = _object;
+        this.content = content;
+    }
+}
+
 public class LevelEditorWindow : ExtendedEditorWindow
 {
     [SerializeField]
-    private List<GameObject> palette = new List<GameObject>();
-    List<GUIContent> paletteIcons = new List<GUIContent>();
+    private Dictionary<CategoryType, MapObject> palette = new Dictionary<CategoryType, MapObject>();
     [SerializeField]
     private int paletteIndex;
-
-    private string path = "Assets/Editor Default Resources/";
 
     [MenuItem(itemName: "Shapes/Level Editor")]
     public static void Init() {
@@ -45,18 +59,18 @@ public class LevelEditorWindow : ExtendedEditorWindow
         GameObjectUtils.Clear();
     }
 
-    private void OnSceneGUI(SceneView target) {
-        if (paintMode) {
-            Event e = Event.current;
-            if(e.type == EventType.MouseMove) {
-                HandleUtility.Repaint();
-            }
-            DisplayHandlesInScene(palette[0].GetComponent<MeshFilter>().sharedMesh, palette[0].GetComponent<MeshRenderer>().sharedMaterial);
-            EditorUtility.SetDirty(target);
-        }
+    private void OnSceneGUI(SceneView sceneView) {
+        if (serializedObject.FindProperty("paintMode").boolValue) {
+            var cellCenter = GetCellCenter();
 
+            DrawHandles(cellCenter);
+            //DrawMeshPreview(palette[0].GetComponent<MeshFilter>().sharedMesh, cellCenter);
+            sceneView.Repaint();
+        }
         DrawCategoriesPanel();
-        DrawSelectionPanel(paletteIcons);
+        if(currentCategoryType != CategoryType.None) {
+            DrawSelectionPanel(palette[currentCategoryType]);
+        }
 
         DrawSaveButton();
         DrawResetButton();
@@ -64,14 +78,16 @@ public class LevelEditorWindow : ExtendedEditorWindow
 
     private void LoadSelectionPrefabs() {
         palette.Clear();
+        string resourcesPath = "Assets/Editor Default Resources/";
 
-        string[] prefabFiles = System.IO.Directory.GetFiles(path, "*.prefab");
-        foreach(var file in prefabFiles) {
-            var go = AssetDatabase.LoadAssetAtPath(file, typeof(GameObject)) as GameObject;
-            palette.Add(go);
-
-            var texture = AssetPreview.GetAssetPreview(go);
-            paletteIcons.Add(new GUIContent(texture));
+        for(CategoryType e = CategoryType.Static; e <= CategoryType.Other; e++) {
+            var path = resourcesPath + e.ToString();
+            string[] prefabFiles = System.IO.Directory.GetFiles(path, "*.prefab");
+            foreach(var file in prefabFiles) {
+                var go = AssetDatabase.LoadAssetAtPath(file, typeof(GameObject)) as GameObject;
+                var content = new GUIContent(AssetPreview.GetAssetPreview(go));
+                palette.Add(e, new MapObject(go, content));
+            }
         }
     }
 }

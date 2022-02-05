@@ -10,7 +10,7 @@ public class ExtendedEditorWindow : EditorWindow
     protected SerializedObject serializedObject;
     protected SerializedProperty currentProperty;
 
-    protected bool paintMode = false;
+    protected CategoryType currentCategoryType = CategoryType.None;
 
     #region Editor Window GUI
 
@@ -49,14 +49,14 @@ public class ExtendedEditorWindow : EditorWindow
 
         GUILayout.BeginVertical();
 
-        foreach (var btn in panel.buttons) {
+        for (int i = 0; i < panel.buttons.Length; i++) {
             GUILayout.Space(panel.buttonOffset);
 
-            if (btn.selected) GUI.backgroundColor = Color.white;
+            if (panel.buttons[i].selected) GUI.backgroundColor = Color.white;
             else GUI.backgroundColor = Color.gray;
 
-            if (GUILayout.Button(btn.name, GUILayout.Height(btn.height), GUILayout.Width(btn.width))) {
-                CategoryButtonPress(btn);
+            if (GUILayout.Button(panel.buttons[i].name, GUILayout.Height(panel.buttons[i].height), GUILayout.Width(panel.buttons[i].width))) {
+                CategoryButtonPress(panel.buttons[i], (CategoryType)i);
             }
             GUILayout.Space(panel.buttonOffset);
         }
@@ -66,17 +66,7 @@ public class ExtendedEditorWindow : EditorWindow
         GUILayout.EndArea();
     }
 
-    private void CategoryButtonPress(Button_ btn) {
-        btn.selected = !btn.selected;
-    }
-
-    private void SelectionButtonPress(Button_ btn) {
-        btn.selected = !btn.selected;
-        paintMode = !paintMode;
-        GameObjectUtils.AddGameObject(btn.name + " GameObject");
-    }
-
-    protected void DrawSelectionPanel(List<GUIContent> contentList) {
+    protected void DrawSelectionPanel(MapObject mapObject) {
         var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
         var panel = settings.topPanel;
 
@@ -105,7 +95,7 @@ public class ExtendedEditorWindow : EditorWindow
             if (btn.selected) GUI.backgroundColor = Color.white;
             else GUI.backgroundColor = Color.gray;
 
-            if (GUILayout.Button(contentList[0], GUILayout.Height(btn.height),
+            if (GUILayout.Button(mapObject.content, GUILayout.Height(btn.height),
                 GUILayout.Width(btn.width))) {
                 SelectionButtonPress(btn);
             }
@@ -131,33 +121,13 @@ public class ExtendedEditorWindow : EditorWindow
         var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
         GUILayout.BeginArea(new Rect(pixelRect.width - 165, pixelRect.height - 80, 80, 80));
         if (GUILayout.Button("Reset", GUILayout.Height(80), GUILayout.Width(80))) {
-            Reset();
+            ResetGUI();
         }
         GUILayout.EndArea();
     }
 
-    private void Reset() {
-        foreach (var btn in settings.leftPanel.buttons) {
-            btn.selected = false;
-        }
-        foreach (var btn in settings.topPanel.buttons) {
-            btn.selected = false;
-        }
-        paintMode = false;
-    }
-
-    private Vector3 cellSize = new Vector3(2f, 0f, 2f);
-
-    protected void DisplayHandlesInScene(Mesh mesh, Material material) {
-        // Get the mouse position in world space such as y = 0
-        Ray guiRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-        Vector3 mousePosition = guiRay.origin - guiRay.direction * (guiRay.origin.y / guiRay.direction.y);
-
-        // Get the corresponding cell on our virtual grid
-        Vector3Int cell = new Vector3Int(Mathf.RoundToInt(mousePosition.x / cellSize.x), 0,
-            Mathf.RoundToInt(mousePosition.z / cellSize.z));
-        Vector3 cellCenter = Vector3.Scale(cell, cellSize);
-
+    protected void DrawHandles(Vector3 cellCenter) {
+        var cellSize = serializedObject.FindProperty("cellSize").vector3Value;
         // Vertices of our square
         Vector3 topLeft = cellCenter + Vector3.Scale(Vector3.left, cellSize) * 0.5f + Vector3.Scale(Vector3.forward, cellSize) * 0.5f;
         Vector3 topRight = cellCenter - Vector3.Scale(Vector3.left, cellSize) * 0.5f + Vector3.Scale(Vector3.forward, cellSize) * 0.5f;
@@ -168,8 +138,55 @@ public class ExtendedEditorWindow : EditorWindow
         Handles.color = Color.green;
         Vector3[] lines = { topLeft, topRight, topRight, bottomRight, bottomRight, bottomLeft, bottomLeft, topLeft };
         Handles.DrawLines(lines);
+    }
 
+    protected void DrawMeshPreview(Mesh mesh, Vector3 cellCenter) {
+        Color color = new Color(104, 223, 248, 213);
+        var material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        material.SetColor("_BaseColor", color);
         Graphics.DrawMesh(mesh, cellCenter, Quaternion.identity, material, 0);
+    }
+
+    #endregion
+
+    #region Other methods
+
+    protected Vector3 GetCellCenter() {
+        var cellSize = serializedObject.FindProperty("cellSize").vector3Value;
+        Ray guiRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+        Vector3 mousePosition = guiRay.origin - guiRay.direction * (guiRay.origin.y / guiRay.direction.y);
+        Vector3Int cell = new Vector3Int(Mathf.RoundToInt(mousePosition.x / cellSize.x), 0,
+            Mathf.RoundToInt(mousePosition.z / cellSize.z));
+        Vector3 cellCenter = Vector3.Scale(cell, cellSize);
+
+        return cellCenter;
+    }
+
+    private void CategoryButtonPress(Button_ btn, CategoryType type) {
+        btn.selected = !btn.selected;
+        if (btn.selected == false) {
+            currentCategoryType = CategoryType.None;
+        }
+        else {
+            currentCategoryType = type;
+        }
+    }
+
+    private void SelectionButtonPress(Button_ btn) {
+        btn.selected = !btn.selected;
+        serializedObject.FindProperty("paintMode").boolValue ^= true;
+        GameObjectUtils.AddGameObject(btn.name + " GameObject");
+    }
+
+
+    private void ResetGUI() {
+        foreach (var btn in settings.leftPanel.buttons) {
+            btn.selected = false;
+        }
+        foreach (var btn in settings.topPanel.buttons) {
+            btn.selected = false;
+        }
+        serializedObject.FindProperty("paintMode").boolValue = false;
     }
 
     #endregion
