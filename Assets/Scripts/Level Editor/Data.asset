@@ -72,3 +72,5 @@ MonoBehaviour:
         height: 0
       buttons: []
       buttonOffset: 0
+  cellSize: {x: 2, y: 0, z: 2}
+  paintMode: 0
