@@ -5,7 +5,13 @@ using UnityEditor;
 
 public class LevelEditorWindow : ExtendedEditorWindow
 {
-    private bool paintMode = false;
+    [SerializeField]
+    private List<GameObject> palette = new List<GameObject>();
+    List<GUIContent> paletteIcons = new List<GUIContent>();
+    [SerializeField]
+    private int paletteIndex;
+
+    private string path = "Assets/Editor Default Resources/";
 
     [MenuItem(itemName: "Shapes/Level Editor")]
     public static void Init() {
@@ -23,16 +29,15 @@ public class LevelEditorWindow : ExtendedEditorWindow
         if(serializedObject == null) {
             LoadSerializedObject();
         }
-        currentProperty = serializedObject.FindProperty("sceneGUISettings");
-        DrawProperties(currentProperty, true);
-
-        paintMode = GUILayout.Toggle(paintMode, "Start painting", "Button", GUILayout.Height(60f));
+        //currentProperty = serializedObject.FindProperty("sceneGUISettings");
+        //DrawProperties(currentProperty, true);
 
         serializedObject.ApplyModifiedProperties();
     }
 
     private void OnEnable() {
         SceneView.duringSceneGui += OnSceneGUI;
+        LoadSelectionPrefabs();
     }
 
     private void OnDisable() {
@@ -40,18 +45,33 @@ public class LevelEditorWindow : ExtendedEditorWindow
         GameObjectUtils.Clear();
     }
 
-    private void OnSceneGUI(SceneView obj) {
-
+    private void OnSceneGUI(SceneView target) {
         if (paintMode) {
             Event e = Event.current;
             if(e.type == EventType.MouseMove) {
                 HandleUtility.Repaint();
             }
-            DisplayHandlesInScene();
+            DisplayHandlesInScene(palette[0].GetComponent<MeshFilter>().sharedMesh, palette[0].GetComponent<MeshRenderer>().sharedMaterial);
+            EditorUtility.SetDirty(target);
         }
 
         DrawCategoriesPanel();
-        DrawSelectionPanel();
+        DrawSelectionPanel(paletteIcons);
+
         DrawSaveButton();
+        DrawResetButton();
+    }
+
+    private void LoadSelectionPrefabs() {
+        palette.Clear();
+
+        string[] prefabFiles = System.IO.Directory.GetFiles(path, "*.prefab");
+        foreach(var file in prefabFiles) {
+            var go = AssetDatabase.LoadAssetAtPath(file, typeof(GameObject)) as GameObject;
+            palette.Add(go);
+
+            var texture = AssetPreview.GetAssetPreview(go);
+            paletteIcons.Add(new GUIContent(texture));
+        }
     }
 }

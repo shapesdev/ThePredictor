@@ -6,8 +6,11 @@ using UnityEditor;
 public class ExtendedEditorWindow : EditorWindow
 {
     protected static SceneGUISettings settings;
+
     protected SerializedObject serializedObject;
     protected SerializedProperty currentProperty;
+
+    protected bool paintMode = false;
 
     #region Editor Window GUI
 
@@ -67,7 +70,13 @@ public class ExtendedEditorWindow : EditorWindow
         btn.selected = !btn.selected;
     }
 
-    protected void DrawSelectionPanel() {
+    private void SelectionButtonPress(Button_ btn) {
+        btn.selected = !btn.selected;
+        paintMode = !paintMode;
+        GameObjectUtils.AddGameObject(btn.name + " GameObject");
+    }
+
+    protected void DrawSelectionPanel(List<GUIContent> contentList) {
         var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
         var panel = settings.topPanel;
 
@@ -96,9 +105,9 @@ public class ExtendedEditorWindow : EditorWindow
             if (btn.selected) GUI.backgroundColor = Color.white;
             else GUI.backgroundColor = Color.gray;
 
-            if (GUILayout.Button(btn.name, GUILayout.Height(btn.height),
+            if (GUILayout.Button(contentList[0], GUILayout.Height(btn.height),
                 GUILayout.Width(btn.width))) {
-                GameObjectUtils.AddGameObject(btn.name + " GameObject");
+                SelectionButtonPress(btn);
             }
             GUILayout.Space(panel.buttonOffset);
         }
@@ -118,9 +127,28 @@ public class ExtendedEditorWindow : EditorWindow
         GUILayout.EndArea();
     }
 
+    protected void DrawResetButton() {
+        var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
+        GUILayout.BeginArea(new Rect(pixelRect.width - 165, pixelRect.height - 80, 80, 80));
+        if (GUILayout.Button("Reset", GUILayout.Height(80), GUILayout.Width(80))) {
+            Reset();
+        }
+        GUILayout.EndArea();
+    }
+
+    private void Reset() {
+        foreach (var btn in settings.leftPanel.buttons) {
+            btn.selected = false;
+        }
+        foreach (var btn in settings.topPanel.buttons) {
+            btn.selected = false;
+        }
+        paintMode = false;
+    }
+
     private Vector3 cellSize = new Vector3(2f, 0f, 2f);
 
-    protected void DisplayHandlesInScene() {
+    protected void DisplayHandlesInScene(Mesh mesh, Material material) {
         // Get the mouse position in world space such as y = 0
         Ray guiRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
         Vector3 mousePosition = guiRay.origin - guiRay.direction * (guiRay.origin.y / guiRay.direction.y);
@@ -140,6 +168,8 @@ public class ExtendedEditorWindow : EditorWindow
         Handles.color = Color.green;
         Vector3[] lines = { topLeft, topRight, topRight, bottomRight, bottomRight, bottomLeft, bottomLeft, topLeft };
         Handles.DrawLines(lines);
+
+        Graphics.DrawMesh(mesh, cellCenter, Quaternion.identity, material, 0);
     }
 
     #endregion
