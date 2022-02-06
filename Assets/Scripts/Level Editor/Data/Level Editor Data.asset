@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 430df8aef8f8ea04681e6504699d2469, type: 3}
-  m_Name: Data
+  m_Name: Level Editor Data
   m_EditorClassIdentifier: 
   sceneGUISettings:
     leftPanel:
@@ -72,5 +72,4 @@ MonoBehaviour:
         height: 0
       buttons: []
       buttonOffset: 0
-  cellSize: {x: 2, y: 0, z: 2}
-  paintMode: 0
+  drawObjects: 0

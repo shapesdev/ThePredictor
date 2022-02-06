@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class ExtendedEditorWindow : EditorWindow
+public class BaseLevelEditorWindow : EditorWindow
 {
     protected static SceneGUISettings settings;
 
     protected SerializedObject serializedObject;
     protected SerializedProperty currentProperty;
 
-    protected CategoryType currentCategoryType = CategoryType.None;
+    protected MapObjectType currentMapObject = MapObjectType.None;
 
     #region Editor Window GUI
 
@@ -52,11 +52,17 @@ public class ExtendedEditorWindow : EditorWindow
         for (int i = 0; i < panel.buttons.Length; i++) {
             GUILayout.Space(panel.buttonOffset);
 
-            if (panel.buttons[i].selected) GUI.backgroundColor = Color.white;
-            else GUI.backgroundColor = Color.gray;
+            if (panel.buttons[i].selected) {
+                GUI.backgroundColor = Color.white;
+                currentMapObject = (MapObjectType)i;
+            }
+            else {
+                GUI.backgroundColor = Color.gray;
+            }
 
             if (GUILayout.Button(panel.buttons[i].name, GUILayout.Height(panel.buttons[i].height), GUILayout.Width(panel.buttons[i].width))) {
-                CategoryButtonPress(panel.buttons[i], (CategoryType)i);
+                CategoryButtonPress(panel.buttons[i], (MapObjectType)i);
+                DisableObjectsInCollection(panel.buttons[i], panel.buttons);
             }
             GUILayout.Space(panel.buttonOffset);
         }
@@ -126,15 +132,12 @@ public class ExtendedEditorWindow : EditorWindow
         GUILayout.EndArea();
     }
 
-    protected void DrawHandles(Vector3 cellCenter) {
-        var cellSize = serializedObject.FindProperty("cellSize").vector3Value;
-        // Vertices of our square
+    protected void DrawHandles(Vector3 cellCenter, Vector3 cellSize) {
         Vector3 topLeft = cellCenter + Vector3.Scale(Vector3.left, cellSize) * 0.5f + Vector3.Scale(Vector3.forward, cellSize) * 0.5f;
         Vector3 topRight = cellCenter - Vector3.Scale(Vector3.left, cellSize) * 0.5f + Vector3.Scale(Vector3.forward, cellSize) * 0.5f;
         Vector3 bottomLeft = cellCenter + Vector3.Scale(Vector3.left, cellSize) * 0.5f - Vector3.Scale(Vector3.forward, cellSize) * 0.5f;
         Vector3 bottomRight = cellCenter - Vector3.Scale(Vector3.left, cellSize) * 0.5f - Vector3.Scale(Vector3.forward, cellSize) * 0.5f;
 
-        // Rendering
         Handles.color = Color.green;
         Vector3[] lines = { topLeft, topRight, topRight, bottomRight, bottomRight, bottomLeft, bottomLeft, topLeft };
         Handles.DrawLines(lines);
@@ -151,33 +154,29 @@ public class ExtendedEditorWindow : EditorWindow
 
     #region Other methods
 
-    protected Vector3 GetCellCenter() {
-        var cellSize = serializedObject.FindProperty("cellSize").vector3Value;
-        Ray guiRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-        Vector3 mousePosition = guiRay.origin - guiRay.direction * (guiRay.origin.y / guiRay.direction.y);
-        Vector3Int cell = new Vector3Int(Mathf.RoundToInt(mousePosition.x / cellSize.x), 0,
-            Mathf.RoundToInt(mousePosition.z / cellSize.z));
-        Vector3 cellCenter = Vector3.Scale(cell, cellSize);
-
-        return cellCenter;
-    }
-
-    private void CategoryButtonPress(Button_ btn, CategoryType type) {
+    private void CategoryButtonPress(Button_ btn, MapObjectType type) {
         btn.selected = !btn.selected;
         if (btn.selected == false) {
-            currentCategoryType = CategoryType.None;
+            currentMapObject = MapObjectType.None;
         }
         else {
-            currentCategoryType = type;
+            currentMapObject = type;
         }
     }
 
     private void SelectionButtonPress(Button_ btn) {
         btn.selected = !btn.selected;
-        serializedObject.FindProperty("paintMode").boolValue ^= true;
+        serializedObject.FindProperty("drawObjects").boolValue ^= true;
         GameObjectUtils.AddGameObject(btn.name + " GameObject");
     }
 
+    private void DisableObjectsInCollection(Button_ obj, Button_[] collection) {
+        foreach(var item in collection) {
+            if(item != obj) {
+                item.selected = false;
+            }
+        }
+    }
 
     private void ResetGUI() {
         foreach (var btn in settings.leftPanel.buttons) {
@@ -186,7 +185,7 @@ public class ExtendedEditorWindow : EditorWindow
         foreach (var btn in settings.topPanel.buttons) {
             btn.selected = false;
         }
-        serializedObject.FindProperty("paintMode").boolValue = false;
+        serializedObject.FindProperty("drawObjects").boolValue = false;
     }
 
     #endregion
