@@ -5,11 +5,6 @@ using UnityEditor;
 
 public class LevelEditorWindow : BaseLevelEditorWindow
 {
-    [SerializeField]
-    private int paletteIndex;
-
-    private LevelEditorGrid grid;
-
     [MenuItem(itemName: "Shapes/Level Editor")]
     public static void Init() {
         LoadSerializedObject();
@@ -47,7 +42,7 @@ public class LevelEditorWindow : BaseLevelEditorWindow
 
     private void OnDisable() {
         SceneView.duringSceneGui -= OnSceneGUI;
-        GameObjectUtils.Clear();
+        grid.ClearGameObjects();
     }
 
     private void OnGUI() {
@@ -57,7 +52,7 @@ public class LevelEditorWindow : BaseLevelEditorWindow
         //currentProperty = serializedObject.FindProperty("sceneGUISettings");
         //DrawProperties(currentProperty, true);
 
-        serializedObject.ApplyModifiedProperties();
+        //serializedObject.ApplyModifiedProperties(); // IT RESETS ON ENTER
     }
 
     private void OnSceneGUI(SceneView sceneView) {
@@ -65,15 +60,19 @@ public class LevelEditorWindow : BaseLevelEditorWindow
         DrawSaveButton();
         DrawResetButton();
 
-        if (currentMapObject != MapObjectType.None) {
-            if (grid.mapObjects.TryGetValue(currentMapObject, out _) == true) {
-                DrawSelectionPanel(grid.mapObjects[currentMapObject]);
+        if (currentMapObjectType != MapObjectType.None) {
+            if (grid.mapObjects.TryGetValue(currentMapObjectType, out _) == true) {
+                Handles.BeginGUI();
+                DrawSelectionPanel(grid.mapObjects[currentMapObjectType]);
+                Handles.EndGUI();
 
                 if (serializedObject.FindProperty("drawObjects").boolValue) {
-                    Debug.Log("size: " + grid.GetCellSize());
-                    DrawMeshPreview(grid.mapObjects[currentMapObject]._object.GetComponent<MeshFilter>().sharedMesh, grid.GetCellCenter());
+                    DrawMeshPreview(grid.mapObjects[currentMapObjectType]._object.GetComponent<MeshFilter>().sharedMesh, grid.GetCellCenter());
                     DrawHandles(grid.GetCellCenter(), grid.GetCellSize());
-                    // WTF DUDE
+
+                    if(Event.current.type == EventType.MouseDown && Event.current.button == 0) {
+                        grid.AddGameObject(currentMapObject._object);
+                    }
                 }
             }
             else {
