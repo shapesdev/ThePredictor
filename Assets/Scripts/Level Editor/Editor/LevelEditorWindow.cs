@@ -76,7 +76,7 @@ public class LevelEditorWindow : BaseLevelEditorWindow
         //currentProperty = serializedObject.FindProperty("sceneGUISettings");
         //DrawProperties(currentProperty, true);
 
-        serializedObject.ApplyModifiedProperties();
+        //serializedObject.ApplyModifiedProperties();
     }
 
     private void OnSceneGUI(SceneView sceneView) {
@@ -92,9 +92,9 @@ public class LevelEditorWindow : BaseLevelEditorWindow
                     var center = grid.GetCellCenter();
                     var cellSize = grid.GetCellSize();
                     // currentMapObject gets reset after close, need to fix this
-                    //var mesh = currentMapObject._object.GetComponent<MeshFilter>().sharedMesh;
+                    var mesh = currentMapObject._object.GetComponent<MeshFilter>().sharedMesh;
 
-                    //DrawMeshPreview(mesh, center);
+                    DrawMeshPreview(mesh, center);
                     DrawHandles(center, cellSize);
 
                     if(Event.current.type == EventType.MouseDown && Event.current.button == 0) {

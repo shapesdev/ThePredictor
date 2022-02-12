@@ -33,4 +33,13 @@ public class EditorMapCatalog
             go.saved = true;
         }
     }
+
+    public bool Exists(Vector3 pos) {
+        foreach(var go in activeGameObjects) {
+            if(pos == go._position) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
