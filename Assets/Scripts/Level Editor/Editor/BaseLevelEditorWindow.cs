@@ -158,10 +158,13 @@ public class BaseLevelEditorWindow : EditorWindow
     }
 
     protected void DrawMeshPreview(Mesh mesh, Vector3 position) {
-        Color color = new Color32(104, 223, 248, 213);
         var material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-        material.SetColor("_BaseColor", color); // Doesn't work for some reason
-        material.SetFloat("_Cutoff", 0.0f);
+        if(mapCatalog.Exists(position)) {
+            material.SetColor("_BaseColor", new Color32(214, 24, 0, 203));
+        }
+        else {
+            material.SetColor("_BaseColor", new Color32(63, 219, 38, 203));
+        }
         Graphics.DrawMesh(mesh, position, Quaternion.identity, material, 0);
     }
 

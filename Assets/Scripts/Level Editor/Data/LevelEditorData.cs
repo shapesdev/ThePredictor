@@ -9,6 +9,9 @@ public class LevelEditorData : ScriptableObject
 
     [HideInInspector]
     [SerializeField]
+    private MapObject currentMapObject;
+    [HideInInspector]
+    [SerializeField]
     private int categoryIndex;
     [HideInInspector]
     [SerializeField]
