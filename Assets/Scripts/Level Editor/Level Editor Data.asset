@@ -72,4 +72,4 @@ MonoBehaviour:
         height: 0
       buttons: []
       buttonOffset: 0
-  drawObjects: 0
+  drawObjects: 1

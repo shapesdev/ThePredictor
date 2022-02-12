@@ -12,7 +12,7 @@ public class BaseLevelEditorWindow : EditorWindow
 
     protected MapObjectType currentMapObjectType = MapObjectType.None;
     protected MapObject currentMapObject = null;
-    protected LevelEditorGrid grid;
+    protected EditorMapCatalog mapCatalog;
 
     #region Editor Window GUI
 
@@ -27,9 +27,39 @@ public class BaseLevelEditorWindow : EditorWindow
         else EditorGUILayout.LabelField(label);
     }
 
+    protected void DrawSaveButton() {
+        if (GUILayout.Button("Save", GUILayout.Height(80))) {
+            mapCatalog.Save();
+        }
+    }
+
+    protected void DrawResetButton() {
+        if (GUILayout.Button("Reset", GUILayout.Height(80))) {
+            ResetGUI();
+        }
+    }
+
     #endregion
 
     #region Scene GUI
+
+    protected void DrawTest() {
+        var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
+        var panel = settings.leftPanel;
+
+        GUILayout.BeginArea(new Rect(panel.rect.x, pixelRect.height / 2 - (panel.rect.height / 2), 80 * 4, 80 * 4));
+
+        string[] names = { "Static", "Active", "Other", "Moving" };
+
+        int categoryIndex = GUILayout.SelectionGrid(serializedObject.FindProperty("categoryIndex").intValue, names, 1, GUILayout.Height(80),
+            GUILayout.Width(80));
+        if(GUILayout.Button("Static")) {
+            Debug.Log("Pressed Static");
+        }
+        serializedObject.FindProperty("categoryIndex").intValue = categoryIndex;
+
+        GUILayout.EndArea();
+    }
 
     protected void DrawCategoriesPanel() {
         var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
@@ -74,7 +104,7 @@ public class BaseLevelEditorWindow : EditorWindow
         GUILayout.EndArea();
     }
 
-    protected void DrawSelectionPanel(MapObject mapObject) {
+    protected void DrawSelectionPanel(List<MapObject> mapObjects) {
         var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
         var panel = settings.topPanel;
 
@@ -96,42 +126,23 @@ public class BaseLevelEditorWindow : EditorWindow
 
                 GUILayout.BeginHorizontal();
                     GUI.backgroundColor = Color.red;
-
-                    foreach (var btn in panel.buttons) {
+                    
+                    for(int i = 0; i < mapObjects.Count; i++) {
                         GUILayout.Space(panel.buttonOffset);
 
-                        if (btn.selected) GUI.backgroundColor = Color.white;
+                        if (panel.buttons[i].selected) GUI.backgroundColor = Color.white;
                         else GUI.backgroundColor = Color.gray;
 
-                        if (GUILayout.Button(mapObject.content, GUILayout.Height(btn.height),
-                            GUILayout.Width(btn.width))) {
-                            SelectionButtonPress(btn, mapObject);
+                        if (GUILayout.Button(mapObjects[i].content, GUILayout.Height(panel.buttons[i].height),
+                            GUILayout.Width(panel.buttons[i].width))) {
+                            SelectionButtonPress(panel.buttons[i], mapObjects[i]);
                         }
-                        GUILayout.Space(panel.buttonOffset);
+                    GUILayout.Space(panel.buttonOffset);
                     }
 
                 GUILayout.EndHorizontal();
                 GUILayout.Space(panel.buttonOffset);
             EditorGUILayout.EndVertical();
-        GUILayout.EndArea();
-    }
-
-    protected void DrawSaveButton() {
-        var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
-
-        GUILayout.BeginArea(new Rect(pixelRect.width - 80, pixelRect.height - 80, 80, 80));
-        if (GUILayout.Button("Save", GUILayout.Height(80), GUILayout.Width(80))) {
-            grid.SaveGameObjects();
-        }
-        GUILayout.EndArea();
-    }
-
-    protected void DrawResetButton() {
-        var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
-        GUILayout.BeginArea(new Rect(pixelRect.width - 165, pixelRect.height - 80, 80, 80));
-        if (GUILayout.Button("Reset", GUILayout.Height(80), GUILayout.Width(80))) {
-            ResetGUI();
-        }
         GUILayout.EndArea();
     }
 
@@ -147,9 +158,10 @@ public class BaseLevelEditorWindow : EditorWindow
     }
 
     protected void DrawMeshPreview(Mesh mesh, Vector3 position) {
-        Color color = new Color(104, 223, 248, 213);
+        Color color = new Color32(104, 223, 248, 213);
         var material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
         material.SetColor("_BaseColor", color); // Doesn't work for some reason
+        material.SetFloat("_Cutoff", 0.0f);
         Graphics.DrawMesh(mesh, position, Quaternion.identity, material, 0);
     }
 
@@ -196,7 +208,7 @@ public class BaseLevelEditorWindow : EditorWindow
         serializedObject.FindProperty("drawObjects").boolValue = false;
         currentMapObject = null;
         currentMapObjectType = MapObjectType.None;
-        grid.ClearGameObjects();
+        mapCatalog.Clear();
     }
 
     #endregion

@@ -8,5 +8,12 @@ public class LevelEditorData : ScriptableObject
     public SceneGUISettings sceneGUISettings;
 
     [HideInInspector]
-    public bool drawObjects = false;
+    [SerializeField]
+    private int categoryIndex;
+    [HideInInspector]
+    [SerializeField]
+    private int selectionIndex;
+    [HideInInspector]
+    [SerializeField]
+    private bool drawObjects = false;
 }
