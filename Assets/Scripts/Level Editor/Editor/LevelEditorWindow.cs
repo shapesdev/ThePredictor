@@ -56,13 +56,13 @@ public class LevelEditorWindow : BaseLevelEditorWindow
     private void OnEnable() {
         SceneView.duringSceneGui += OnSceneGUI;
         LoadLevelEditorGrid();
-        UpdateSceneView(GetWindow<SceneView>());
+        UpdateSceneViewSettings(GetWindow<SceneView>());
     }
 
     private void OnDisable() {
         SceneView.duringSceneGui -= OnSceneGUI;
         mapCatalog.Clear();
-        UpdateSceneView(GetWindow<SceneView>(), true);
+        UpdateSceneViewSettings(GetWindow<SceneView>(), true);
     }
 
     private void OnGUI() {
@@ -80,38 +80,55 @@ public class LevelEditorWindow : BaseLevelEditorWindow
     }
 
     private void OnSceneGUI(SceneView sceneView) {
+        DrawSceneGUI(sceneView);
+
+        sceneView.Repaint();
+    }
+
+    #region SceneGUI methods
+
+    private void DrawSceneGUI(SceneView sceneView) {
         DrawCategoriesPanel();
 
         if (currentMapObjectType != MapObjectType.None) {
             if (grid.mapObjects.TryGetValue(currentMapObjectType, out _) == true) {
-                Handles.BeginGUI();
                 DrawSelectionPanel(grid.mapObjects[currentMapObjectType]);
-                Handles.EndGUI();
-
                 if (serializedObject.FindProperty("drawObjects").boolValue) {
                     var center = grid.GetCellCenter();
                     var cellSize = grid.GetCellSize();
-                    // currentMapObject gets reset after close, need to fix this
-                    var mesh = currentMapObject._object.GetComponent<MeshFilter>().sharedMesh;
+                    var mesh = currentMapObject._object.GetComponent<MeshFilter>().sharedMesh; // currentMapObject gets reset after close, need to fix this
 
                     DrawMeshPreview(mesh, center);
                     DrawHandles(center, cellSize);
-
-                    if(Event.current.type == EventType.MouseDown && Event.current.button == 0) {
-                        mapCatalog.Add(currentMapObject._object, center);
-                    }
-                    Selection.activeObject = null;
+                    HandleMouseEvents(center, sceneView);
                 }
             }
             else {
                 sceneView.ShowNotification(new GUIContent("There are no objects of this type"), 0.1f);
             }
         }
-
-        sceneView.Repaint();
     }
 
-    private void UpdateSceneView(SceneView sceneView, bool reset = false) {
+    private void HandleMouseEvents(Vector3 center, SceneView sceneView) {
+        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
+
+        Event e = Event.current;
+        if(e.type == EventType.MouseDown || e.type == EventType.MouseDrag) {
+            if (e.button == 0) {
+                if (mapCatalog.Exists(center)) {
+                    if(e.type == EventType.MouseDown) {
+                        sceneView.ShowNotification(new GUIContent("Cannot add GameObject here"), 0.1f);
+                    }
+                }
+                else {
+                    mapCatalog.Add(currentMapObject._object, center);
+                }
+            }
+        }
+        Selection.activeObject = null;
+    }
+
+    private void UpdateSceneViewSettings(SceneView sceneView, bool reset = false) {
         if(reset) {
             if (originalSceneView.gridUpdated) {
                 sceneView.showGrid = !sceneView.showGrid;
@@ -131,4 +148,6 @@ public class LevelEditorWindow : BaseLevelEditorWindow
             }
         }
     }
+
+    #endregion
 }

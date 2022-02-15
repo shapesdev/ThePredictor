@@ -6,15 +6,21 @@ using UnityEngine;
 public class EditorMapCatalog
 {
     private List<MapObject> activeGameObjects;
+    private GameObject parent = null;
 
     public EditorMapCatalog() {
         activeGameObjects = new List<MapObject>();
     }
 
     public void Add(GameObject obj, Vector3 pos) {
+        if(parent == null) {
+            parent = new GameObject("Level");
+        }
+
         GameObject go = PrefabUtility.InstantiatePrefab(obj) as GameObject;
         var mapObject = new MapObject(go);
         go.transform.position = mapObject._position = pos;
+        go.transform.SetParent(parent.transform);
         activeGameObjects.Add(mapObject);
         Undo.RegisterCreatedObjectUndo(go, "");
     }
@@ -26,11 +32,15 @@ public class EditorMapCatalog
             }
         }
         activeGameObjects.Clear();
+        GameObject.DestroyImmediate(parent);
+        parent = null;
     }
 
     public void Save() {
         foreach(var go in activeGameObjects) {
-            go.saved = true;
+            if(go._object != null) {
+                go.saved = true;
+            }
         }
     }
 

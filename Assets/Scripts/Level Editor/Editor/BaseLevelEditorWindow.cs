@@ -108,6 +108,8 @@ public class BaseLevelEditorWindow : EditorWindow
         var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
         var panel = settings.topPanel;
 
+        Handles.BeginGUI();
+
         GUILayout.BeginArea(new Rect(pixelRect.width / 2 - (panel.rect.width / 2),
             panel.rect.y, panel.rect.width, panel.rect.height));
 
@@ -144,6 +146,8 @@ public class BaseLevelEditorWindow : EditorWindow
                 GUILayout.Space(panel.buttonOffset);
             EditorGUILayout.EndVertical();
         GUILayout.EndArea();
+
+        Handles.EndGUI();
     }
 
     protected void DrawHandles(Vector3 cellCenter, Vector3 cellSize) {
@@ -163,7 +167,7 @@ public class BaseLevelEditorWindow : EditorWindow
             material.SetColor("_BaseColor", new Color32(214, 24, 0, 203));
         }
         else {
-            material.SetColor("_BaseColor", new Color32(63, 219, 38, 203));
+            material.SetColor("_BaseColor", new Color32(48, 204, 214, 203));
         }
         Graphics.DrawMesh(mesh, position, Quaternion.identity, material, 0);
     }
