@@ -7,12 +7,10 @@ public class LevelEditorGrid
 {
     private Vector3 cellSize;
     private Vector2 gridSize;
-    public Dictionary<MapObjectType, List<MapObject>> mapObjects;
 
     public LevelEditorGrid(Vector2 gridSize, Vector3 cellSize) {
         this.gridSize = gridSize;
         this.cellSize = cellSize;
-        mapObjects = new Dictionary<MapObjectType, List<MapObject>>();
     }
 
     public Vector2 GetGridSize() {

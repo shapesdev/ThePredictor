@@ -6,7 +6,6 @@ using UnityEngine;
 public class Button_
 {
     public string name;
-    public bool selected;
     public int width;
     public int height;
 }

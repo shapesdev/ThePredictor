@@ -8,8 +8,11 @@ public class EditorMapCatalog
     private List<MapObject> activeGameObjects;
     private GameObject parent = null;
 
+    public Dictionary<MapObjectType, List<MapObject>> mapObjects;
+
     public EditorMapCatalog() {
         activeGameObjects = new List<MapObject>();
+        mapObjects = new Dictionary<MapObjectType, List<MapObject>>();
     }
 
     public void Add(GameObject obj, Vector3 pos) {

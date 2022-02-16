@@ -22,19 +22,15 @@ MonoBehaviour:
         height: 440
       buttons:
       - name: Static
-        selected: 0
         width: 80
         height: 80
       - name: Moving
-        selected: 0
         width: 80
         height: 80
       - name: Active
-        selected: 0
         width: 80
         height: 80
       - name: Other
-        selected: 0
         width: 80
         height: 80
       buttonOffset: 2
@@ -47,19 +43,15 @@ MonoBehaviour:
         height: 99660.9
       buttons:
       - name: 1
-        selected: 0
         width: 50
         height: 50
       - name: 2
-        selected: 0
         width: 50
         height: 50
       - name: 3
-        selected: 0
         width: 50
         height: 50
       - name: 4
-        selected: 0
         width: 50
         height: 50
       buttonOffset: 5
@@ -72,6 +64,6 @@ MonoBehaviour:
         height: 0
       buttons: []
       buttonOffset: 0
-  categoryIndex: 0
-  selectionIndex: 0
+  categoryIndex: -1
+  selectionIndex: -1
   drawObjects: 0

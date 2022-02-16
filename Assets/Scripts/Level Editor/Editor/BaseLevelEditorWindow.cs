@@ -84,7 +84,7 @@ public class BaseLevelEditorWindow : EditorWindow
         for (int i = 0; i < panel.buttons.Length; i++) {
             GUILayout.Space(panel.buttonOffset);
 
-            if (panel.buttons[i].selected) {
+            if(serializedObject.FindProperty("categoryIndex").intValue == i) {
                 GUI.backgroundColor = Color.white;
                 currentMapObjectType = (MapObjectType)i;
             }
@@ -93,8 +93,7 @@ public class BaseLevelEditorWindow : EditorWindow
             }
 
             if (GUILayout.Button(panel.buttons[i].name, GUILayout.Height(panel.buttons[i].height), GUILayout.Width(panel.buttons[i].width))) {
-                CategoryButtonPress(panel.buttons[i], (MapObjectType)i);
-                DisableObjectsInCollection(panel.buttons[i], panel.buttons);
+                CategoryButtonPress(i, (MapObjectType)i);
             }
             GUILayout.Space(panel.buttonOffset);
         }
@@ -132,12 +131,17 @@ public class BaseLevelEditorWindow : EditorWindow
                     for(int i = 0; i < mapObjects.Count; i++) {
                         GUILayout.Space(panel.buttonOffset);
 
-                        if (panel.buttons[i].selected) GUI.backgroundColor = Color.white;
-                        else GUI.backgroundColor = Color.gray;
+                        if (serializedObject.FindProperty("selectionIndex").intValue == i) {
+                            GUI.backgroundColor = Color.white;
+                            currentMapObject = mapObjects[i];
+                        }
+                        else {
+                            GUI.backgroundColor = Color.gray;
+                        }
 
                         if (GUILayout.Button(mapObjects[i].content, GUILayout.Height(panel.buttons[i].height),
                             GUILayout.Width(panel.buttons[i].width))) {
-                            SelectionButtonPress(panel.buttons[i], mapObjects[i]);
+                            SelectionButtonPress(i, mapObjects[i]);
                         }
                     GUILayout.Space(panel.buttonOffset);
                     }
@@ -176,43 +180,35 @@ public class BaseLevelEditorWindow : EditorWindow
 
     #region Other methods
 
-    private void CategoryButtonPress(Button_ btn, MapObjectType type) {
-        btn.selected = !btn.selected;
-        if (btn.selected == false) {
+    private void CategoryButtonPress(int index, MapObjectType type) {
+        var prop = serializedObject.FindProperty("categoryIndex");
+        if (prop.intValue == index) {
             currentMapObjectType = MapObjectType.None;
+            prop.intValue = -1;
         }
         else {
             currentMapObjectType = type;
+            prop.intValue = index;
         }
     }
 
-    private void SelectionButtonPress(Button_ btn, MapObject obj) {
-        btn.selected = !btn.selected;
-        serializedObject.FindProperty("drawObjects").boolValue ^= true;
+    private void SelectionButtonPress(int index, MapObject obj) {
+        var prop = serializedObject.FindProperty("selectionIndex");
         if(currentMapObject == obj) {
             currentMapObject = null;
+            prop.intValue = -1;
         }
         else {
             currentMapObject = obj;
+            prop.intValue = index;
         }
-    }
-
-    private void DisableObjectsInCollection(Button_ obj, Button_[] collection) {
-        foreach(var item in collection) {
-            if(item != obj) {
-                item.selected = false;
-            }
-        }
+        serializedObject.FindProperty("drawObjects").boolValue ^= true;
     }
 
     private void ResetGUI() {
-        foreach (var btn in settings.leftPanel.buttons) {
-            btn.selected = false;
-        }
-        foreach (var btn in settings.topPanel.buttons) {
-            btn.selected = false;
-        }
         serializedObject.FindProperty("drawObjects").boolValue = false;
+        serializedObject.FindProperty("categoryIndex").intValue = -1;
+        serializedObject.FindProperty("selectionIndex").intValue = -1;
         currentMapObject = null;
         currentMapObjectType = MapObjectType.None;
         mapCatalog.Clear();
