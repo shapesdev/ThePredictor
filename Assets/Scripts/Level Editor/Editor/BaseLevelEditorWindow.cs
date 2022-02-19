@@ -14,6 +14,8 @@ public class BaseLevelEditorWindow : EditorWindow
     protected MapObject currentMapObject = null;
     protected EditorMapCatalog mapCatalog;
 
+    private GameObject gridObj = null;
+
     #region Editor Window GUI
 
     protected void DrawProperties(SerializedProperty prop, bool drawChildren) {
@@ -43,22 +45,17 @@ public class BaseLevelEditorWindow : EditorWindow
 
     #region Scene GUI
 
-    protected void DrawTest() {
-        var pixelRect = SceneView.currentDrawingSceneView.camera.pixelRect;
-        var panel = settings.leftPanel;
-
-        GUILayout.BeginArea(new Rect(panel.rect.x, pixelRect.height / 2 - (panel.rect.height / 2), 80 * 4, 80 * 4));
-
-        string[] names = { "Static", "Active", "Other", "Moving" };
-
-        int categoryIndex = GUILayout.SelectionGrid(serializedObject.FindProperty("categoryIndex").intValue, names, 1, GUILayout.Height(80),
-            GUILayout.Width(80));
-        if(GUILayout.Button("Static")) {
-            Debug.Log("Pressed Static");
+    protected void DrawGrid() {
+        if(gridObj == null) {
+            var gridSize = serializedObject.FindProperty("gridSize").vector2Value;
+            var cellSize = serializedObject.FindProperty("cellSize").vector3Value;
+            gridObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            gridObj.transform.position = new Vector3(gridObj.transform.position.x, gridObj.transform.position.y - 0.5f,
+                gridObj.transform.position.z);
+            gridObj.transform.rotation = Quaternion.Euler(new Vector3(90, 0, 0));
+            gridObj.transform.localScale = new Vector3(gridSize.x * cellSize.x, gridSize.y * cellSize.z, 1);
+            gridObj.tag = "LevelGrid";
         }
-        serializedObject.FindProperty("categoryIndex").intValue = categoryIndex;
-
-        GUILayout.EndArea();
     }
 
     protected void DrawCategoriesPanel() {
@@ -167,11 +164,11 @@ public class BaseLevelEditorWindow : EditorWindow
 
     protected void DrawMeshPreview(Mesh mesh, Vector3 position) {
         var material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-        if(mapCatalog.Exists(position)) {
-            material.SetColor("_BaseColor", new Color32(214, 24, 0, 203));
+        if(!mapCatalog.Exists(position) && IsWithinGrid(position)) {
+            material.SetColor("_BaseColor", new Color32(48, 204, 214, 203));
         }
         else {
-            material.SetColor("_BaseColor", new Color32(48, 204, 214, 203));
+            material.SetColor("_BaseColor", new Color32(214, 24, 0, 203));
         }
         Graphics.DrawMesh(mesh, position, Quaternion.identity, material, 0);
     }
@@ -179,6 +176,16 @@ public class BaseLevelEditorWindow : EditorWindow
     #endregion
 
     #region Other methods
+
+    protected bool IsWithinGrid(Vector3 pos) {
+        RaycastHit hit;
+        if(Physics.Raycast(pos, -Vector3.up, out hit)) {
+            if(hit.transform.tag == "LevelGrid") {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void CategoryButtonPress(int index, MapObjectType type) {
         var prop = serializedObject.FindProperty("categoryIndex");
@@ -194,15 +201,17 @@ public class BaseLevelEditorWindow : EditorWindow
 
     private void SelectionButtonPress(int index, MapObject obj) {
         var prop = serializedObject.FindProperty("selectionIndex");
-        if(currentMapObject == obj) {
+        var drawProp = serializedObject.FindProperty("drawObjects");
+        if (currentMapObject == obj) {
             currentMapObject = null;
             prop.intValue = -1;
+            drawProp.boolValue = false;
         }
         else {
             currentMapObject = obj;
             prop.intValue = index;
+            drawProp.boolValue = true;
         }
-        serializedObject.FindProperty("drawObjects").boolValue ^= true;
     }
 
     private void ResetGUI() {
@@ -212,6 +221,8 @@ public class BaseLevelEditorWindow : EditorWindow
         currentMapObject = null;
         currentMapObjectType = MapObjectType.None;
         mapCatalog.Clear();
+        GameObject.DestroyImmediate(gridObj);
+        gridObj = null;
     }
 
     #endregion

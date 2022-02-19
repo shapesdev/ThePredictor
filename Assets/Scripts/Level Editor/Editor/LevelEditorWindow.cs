@@ -5,7 +5,6 @@ using UnityEditor;
 
 public class LevelEditorWindow : BaseLevelEditorWindow
 {
-    private LevelEditorGrid grid;
     private SceneViewSettings originalSceneView = new SceneViewSettings();
 
     [MenuItem(itemName: "Shapes/Level Editor")]
@@ -22,8 +21,7 @@ public class LevelEditorWindow : BaseLevelEditorWindow
         window.serializedObject = new SerializedObject(data);
     }
 
-    private void LoadLevelEditorGrid() {
-        grid = new LevelEditorGrid(new Vector2(10, 10), new Vector3(2.0f, 0.0f, 2.0f));
+    private void LoadLevelEditorData() {
         mapCatalog = new EditorMapCatalog();
         string resourcesPath = "Assets/Editor Default Resources/";
 
@@ -55,7 +53,7 @@ public class LevelEditorWindow : BaseLevelEditorWindow
 
     private void OnEnable() {
         SceneView.duringSceneGui += OnSceneGUI;
-        LoadLevelEditorGrid();
+        LoadLevelEditorData();
         UpdateSceneViewSettings();
     }
 
@@ -86,15 +84,16 @@ public class LevelEditorWindow : BaseLevelEditorWindow
     #region SceneGUI methods
 
     private void DrawSceneGUI(SceneView sceneView) {
+        var cellSize = serializedObject.FindProperty("cellSize").vector3Value;
+        DrawGrid();
         DrawCategoriesPanel();
 
         if (currentMapObjectType != MapObjectType.None) {
             if (mapCatalog.mapObjects.TryGetValue(currentMapObjectType, out _) == true) {
                 DrawSelectionPanel(mapCatalog.mapObjects[currentMapObjectType]);
                 if (serializedObject.FindProperty("drawObjects").boolValue) {
-                    var center = grid.GetCellCenter();
-                    var cellSize = grid.GetCellSize();
-                    var mesh = currentMapObject._object.GetComponent<MeshFilter>().sharedMesh; // currentMapObject gets reset after close, need to fix this
+                    var center = GetCellCenter();
+                    var mesh = currentMapObject._object.GetComponent<MeshFilter>().sharedMesh;
 
                     DrawMeshPreview(mesh, center);
                     DrawHandles(center, cellSize);
@@ -119,6 +118,9 @@ public class LevelEditorWindow : BaseLevelEditorWindow
                         sceneView.ShowNotification(new GUIContent("An GameObject already exists here"), 0.1f);
                     }
                 }
+                else if(!IsWithinGrid(center)) {
+                    sceneView.ShowNotification(new GUIContent("GameObject can only be placed within grid bounds"), 0.1f);
+                }
                 else {
                     mapCatalog.Add(currentMapObject._object, center);
                 }
@@ -139,6 +141,17 @@ public class LevelEditorWindow : BaseLevelEditorWindow
             originalSceneView.skyboxEnabled = sceneView.sceneViewState.showSkybox;
             sceneView.sceneViewState.showSkybox = false;
         }
+    }
+
+    private Vector3 GetCellCenter() {
+        var cellSize = serializedObject.FindProperty("cellSize").vector3Value;
+        Ray guiRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+        Vector3 mousePosition = guiRay.origin - guiRay.direction * (guiRay.origin.y / guiRay.direction.y);
+        Vector3Int cell = new Vector3Int(Mathf.RoundToInt(mousePosition.x / cellSize.x), 0,
+            Mathf.RoundToInt(mousePosition.z / cellSize.z));
+        Vector3 cellCenter = Vector3.Scale(cell, cellSize);
+
+        return cellCenter;
     }
 
     #endregion

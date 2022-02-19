@@ -19,8 +19,8 @@ public class EditorMapCatalog
         if(parent == null) {
             parent = new GameObject("Level");
         }
-
-        GameObject go = PrefabUtility.InstantiatePrefab(obj) as GameObject;
+        GameObject go = GameObject.Instantiate(obj);
+        go.name = $"{go.name}-Preview";
         var mapObject = new MapObject(go);
         go.transform.position = mapObject._position = pos;
         go.transform.SetParent(parent.transform);
@@ -43,6 +43,7 @@ public class EditorMapCatalog
         foreach(var go in activeGameObjects) {
             if(go._object != null) {
                 go.saved = true;
+                go._object.name = go._object.name.Substring(0, go._object.name.Length - 8);
             }
         }
     }

@@ -64,6 +64,8 @@ MonoBehaviour:
         height: 0
       buttons: []
       buttonOffset: 0
+  cellSize: {x: 2, y: 0, z: 2}
+  gridSize: {x: 10, y: 10}
   categoryIndex: -1
   selectionIndex: -1
   drawObjects: 0
