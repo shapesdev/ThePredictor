@@ -68,4 +68,5 @@ MonoBehaviour:
   gridSize: {x: 10, y: 10}
   categoryIndex: -1
   selectionIndex: -1
+  selectionPage: 0
   drawObjects: 0

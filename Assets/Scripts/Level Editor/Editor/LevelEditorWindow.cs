@@ -68,8 +68,10 @@ public class LevelEditorWindow : BaseLevelEditorWindow
             LoadSerializedObject();
         }
 
-        DrawSaveButton();
-        DrawResetButton();
+        DrawProperty(serializedObject.FindProperty("gridSize"), false, true);
+        DrawProperty(serializedObject.FindProperty("cellSize"), false, true);
+
+        DrawGeneralButtons();
 
         serializedObject.ApplyModifiedProperties();
     }
@@ -85,7 +87,8 @@ public class LevelEditorWindow : BaseLevelEditorWindow
 
     private void DrawSceneGUI(SceneView sceneView) {
         var cellSize = serializedObject.FindProperty("cellSize").vector3Value;
-        DrawGrid();
+        var gridSize = serializedObject.FindProperty("gridSize").vector2Value;
+        DrawGrid(gridSize, cellSize);
         DrawCategoriesPanel();
 
         if (currentMapObjectType != MapObjectType.None) {

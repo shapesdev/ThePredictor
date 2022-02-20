@@ -14,13 +14,19 @@ public class BaseLevelEditorWindow : EditorWindow
     protected MapObject currentMapObject = null;
     protected EditorMapCatalog mapCatalog;
 
-    private GameObject gridObj = null;
+    private const int MAX_SELECTIONS = 4;
 
     #region Editor Window GUI
 
-    protected void DrawProperties(SerializedProperty prop, bool drawChildren) {
+    protected void DrawProperty(SerializedProperty prop, bool drawChildren, bool boldLabel) {
         if(prop != null) {
+            var origFontStyle = EditorStyles.label.fontStyle;
+            if (boldLabel) {
+                EditorStyles.label.fontStyle = FontStyle.Bold;
+            }
             EditorGUILayout.PropertyField(prop, drawChildren);
+            EditorStyles.label.fontStyle = origFontStyle;
+            EditorGUILayout.Space();
         }
     }
 
@@ -29,33 +35,32 @@ public class BaseLevelEditorWindow : EditorWindow
         else EditorGUILayout.LabelField(label);
     }
 
-    protected void DrawSaveButton() {
-        if (GUILayout.Button("Save", GUILayout.Height(80))) {
+    protected void DrawGeneralButtons() {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Save", GUILayout.Height(50), GUILayout.Width(50))) {
             mapCatalog.Save();
         }
-    }
-
-    protected void DrawResetButton() {
-        if (GUILayout.Button("Reset", GUILayout.Height(80))) {
+        if (GUILayout.Button("Reset", GUILayout.Height(50), GUILayout.Width(50))) {
             ResetGUI();
         }
+        GUILayout.EndHorizontal();
     }
 
     #endregion
 
     #region Scene GUI
 
-    protected void DrawGrid() {
-        if(gridObj == null) {
-            var gridSize = serializedObject.FindProperty("gridSize").vector2Value;
-            var cellSize = serializedObject.FindProperty("cellSize").vector3Value;
-            gridObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            gridObj.transform.position = new Vector3(gridObj.transform.position.x, gridObj.transform.position.y - 0.5f,
-                gridObj.transform.position.z);
-            gridObj.transform.rotation = Quaternion.Euler(new Vector3(90, 0, 0));
-            gridObj.transform.localScale = new Vector3(gridSize.x * cellSize.x, gridSize.y * cellSize.z, 1);
-            gridObj.tag = "LevelGrid";
+    protected void DrawGrid(Vector2 gridSize, Vector3 cellSize) {
+        if (mapCatalog.parent == null) {
+            var obj = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            obj.transform.position = new Vector3(obj.transform.position.x, obj.transform.position.y - 0.5f,
+                obj.transform.position.z);
+            obj.transform.rotation = Quaternion.Euler(new Vector3(90, 0, 0));
+            obj.tag = "LevelGrid";
+            obj.name = "Level";
+            mapCatalog.parent = obj;
         }
+        mapCatalog.parent.transform.localScale = new Vector3(gridSize.x * cellSize.x, gridSize.y * cellSize.z, 1);
     }
 
     protected void DrawCategoriesPanel() {
@@ -65,38 +70,34 @@ public class BaseLevelEditorWindow : EditorWindow
         GUILayout.BeginArea(new Rect(panel.rect.x, pixelRect.height / 2 - (panel.rect.height / 2),
             panel.rect.width, panel.rect.height));
 
-        var rect = EditorGUILayout.BeginVertical();
-        GUI.Box(rect, GUIContent.none);
+            var rect = EditorGUILayout.BeginVertical();
+                GUI.Box(rect, GUIContent.none);
 
-        GUI.color = Color.white;
+                GUILayout.BeginHorizontal();
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label("Categories", EditorStyles.boldLabel);
+                    GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
 
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.Label("Categories", EditorStyles.boldLabel);
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
+                GUILayout.BeginVertical();
+                    for (int i = 0; i < panel.buttons.Length; i++) {
+                        GUILayout.Space(panel.buttonOffset);
+                        
+                        if(serializedObject.FindProperty("categoryIndex").intValue == i) {
+                            GUI.backgroundColor = Color.white;
+                            currentMapObjectType = (MapObjectType)i;
+                        }
+                        else {
+                            GUI.backgroundColor = Color.gray;
+                        }
 
-        GUILayout.BeginVertical();
-
-        for (int i = 0; i < panel.buttons.Length; i++) {
-            GUILayout.Space(panel.buttonOffset);
-
-            if(serializedObject.FindProperty("categoryIndex").intValue == i) {
-                GUI.backgroundColor = Color.white;
-                currentMapObjectType = (MapObjectType)i;
-            }
-            else {
-                GUI.backgroundColor = Color.gray;
-            }
-
-            if (GUILayout.Button(panel.buttons[i].name, GUILayout.Height(panel.buttons[i].height), GUILayout.Width(panel.buttons[i].width))) {
-                CategoryButtonPress(i, (MapObjectType)i);
-            }
-            GUILayout.Space(panel.buttonOffset);
-        }
-
-        GUILayout.EndVertical();
-        EditorGUILayout.EndVertical();
+                        if (GUILayout.Button(panel.buttons[i].name, GUILayout.Height(panel.buttons[i].height), GUILayout.Width(panel.buttons[i].width))) {
+                            CategoryButtonPress(i, (MapObjectType)i);
+                        }
+                        GUILayout.Space(panel.buttonOffset);
+                    }
+                GUILayout.EndVertical();
+            EditorGUILayout.EndVertical();
         GUILayout.EndArea();
     }
 
@@ -107,12 +108,10 @@ public class BaseLevelEditorWindow : EditorWindow
         Handles.BeginGUI();
 
         GUILayout.BeginArea(new Rect(pixelRect.width / 2 - (panel.rect.width / 2),
-            panel.rect.y, panel.rect.width, panel.rect.height));
+            panel.rect.y, panel.rect.width + 50, panel.rect.height));
 
-            var rect = EditorGUILayout.BeginVertical();
-
-                GUI.Box(rect, GUIContent.none);
-                GUI.color = Color.white;
+        var rect = EditorGUILayout.BeginVertical();
+            GUI.Box(rect, GUIContent.none);
 
                 GUILayout.BeginHorizontal();
                     GUILayout.FlexibleSpace();
@@ -123,12 +122,17 @@ public class BaseLevelEditorWindow : EditorWindow
                 GUILayout.Space(panel.buttonOffset);
 
                 GUILayout.BeginHorizontal();
-                    GUI.backgroundColor = Color.red;
-                    
-                    for(int i = 0; i < mapObjects.Count; i++) {
+                    var selectionPage = serializedObject.FindProperty("selectionPage");
+                    if (GUILayout.Button("<", GUILayout.Width(20), GUILayout.Height(20))) {
+                        if(selectionPage.intValue > 0) {
+                            selectionPage.intValue -= 1;
+                        }
+                    }
+                    for (int i = selectionPage.intValue * MAX_SELECTIONS, x = 0; i < mapObjects.Count && x < 4; i++, x++) {
                         GUILayout.Space(panel.buttonOffset);
+                        var selectionProp = serializedObject.FindProperty("selectionIndex");
 
-                        if (serializedObject.FindProperty("selectionIndex").intValue == i) {
+                        if (selectionProp.intValue == i) {
                             GUI.backgroundColor = Color.white;
                             currentMapObject = mapObjects[i];
                         }
@@ -136,13 +140,18 @@ public class BaseLevelEditorWindow : EditorWindow
                             GUI.backgroundColor = Color.gray;
                         }
 
-                        if (GUILayout.Button(mapObjects[i].content, GUILayout.Height(panel.buttons[i].height),
-                            GUILayout.Width(panel.buttons[i].width))) {
+                        if (GUILayout.Button(mapObjects[i].content, GUILayout.Height(panel.buttons[x].height),
+                            GUILayout.Width(panel.buttons[x].width))) {
                             SelectionButtonPress(i, mapObjects[i]);
                         }
                     GUILayout.Space(panel.buttonOffset);
                     }
-
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button(">", GUILayout.Width(20), GUILayout.Height(20))) {
+                        if(selectionPage.intValue + 1 <= mapObjects.Count / MAX_SELECTIONS) {
+                            selectionPage.intValue += 1;
+                        }
+                    }
                 GUILayout.EndHorizontal();
                 GUILayout.Space(panel.buttonOffset);
             EditorGUILayout.EndVertical();
@@ -218,11 +227,10 @@ public class BaseLevelEditorWindow : EditorWindow
         serializedObject.FindProperty("drawObjects").boolValue = false;
         serializedObject.FindProperty("categoryIndex").intValue = -1;
         serializedObject.FindProperty("selectionIndex").intValue = -1;
+        serializedObject.FindProperty("selectionPage").intValue = 0;
         currentMapObject = null;
         currentMapObjectType = MapObjectType.None;
         mapCatalog.Clear();
-        GameObject.DestroyImmediate(gridObj);
-        gridObj = null;
     }
 
     #endregion

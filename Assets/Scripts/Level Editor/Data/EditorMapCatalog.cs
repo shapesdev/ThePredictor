@@ -6,7 +6,7 @@ using UnityEngine;
 public class EditorMapCatalog
 {
     private List<MapObject> activeGameObjects;
-    private GameObject parent = null;
+    public GameObject parent = null;
 
     public Dictionary<MapObjectType, List<MapObject>> mapObjects;
 
@@ -16,9 +16,6 @@ public class EditorMapCatalog
     }
 
     public void Add(GameObject obj, Vector3 pos) {
-        if(parent == null) {
-            parent = new GameObject("Level");
-        }
         GameObject go = GameObject.Instantiate(obj);
         go.name = $"{go.name}-Preview";
         var mapObject = new MapObject(go);
