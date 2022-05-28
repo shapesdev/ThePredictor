@@ -14,11 +14,16 @@ public class LevelEditorData : ScriptableObject
     [HideInInspector]
     [SerializeField]
     private Vector2 gridSize;
+    [Range(0, 5)]
+    [SerializeField]
+    private int upLayer;
     [HideInInspector]
     [SerializeField]
     private int categoryIndex;
+    [HideInInspector]
     [SerializeField]
     private int selectionIndex;
+    [HideInInspector]
     [SerializeField]
     private int selectionPage;
     [HideInInspector]

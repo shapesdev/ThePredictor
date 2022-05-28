@@ -189,7 +189,7 @@ public class BaseLevelEditorWindow : EditorWindow
     protected bool IsWithinGrid(Vector3 pos) {
         RaycastHit hit;
         if(Physics.Raycast(pos, -Vector3.up, out hit)) {
-            if(hit.transform.tag == "LevelGrid") {
+            if (hit.transform.tag == "LevelGrid" || hit.transform.gameObject.layer == 8) {
                 return true;
             }
         }

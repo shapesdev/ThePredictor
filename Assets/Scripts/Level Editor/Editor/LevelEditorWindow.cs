@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System;
 
 public class LevelEditorWindow : BaseLevelEditorWindow
 {
@@ -15,7 +16,8 @@ public class LevelEditorWindow : BaseLevelEditorWindow
     #region Loading methods
 
     private static void LoadSerializedObject() {
-        LevelEditorWindow window = GetWindow<LevelEditorWindow>("Level Editor");
+        var inspectorType = Type.GetType("UnityEditor.InspectorWindow,UnityEditor.dll");
+        LevelEditorWindow window = GetWindow<LevelEditorWindow>("Level Editor", inspectorType);
         var data = AssetUtils.GetInstance<LevelEditorData>();
         settings = data.sceneGUISettings;
         window.serializedObject = new SerializedObject(data);
@@ -70,6 +72,7 @@ public class LevelEditorWindow : BaseLevelEditorWindow
 
         DrawProperty(serializedObject.FindProperty("gridSize"), false, true);
         DrawProperty(serializedObject.FindProperty("cellSize"), false, true);
+        DrawProperty(serializedObject.FindProperty("upLayer"), false, true);
 
         DrawGeneralButtons();
 
@@ -148,11 +151,13 @@ public class LevelEditorWindow : BaseLevelEditorWindow
 
     private Vector3 GetCellCenter() {
         var cellSize = serializedObject.FindProperty("cellSize").vector3Value;
+        var upLayer = serializedObject.FindProperty("upLayer").intValue;
         Ray guiRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
         Vector3 mousePosition = guiRay.origin - guiRay.direction * (guiRay.origin.y / guiRay.direction.y);
         Vector3Int cell = new Vector3Int(Mathf.RoundToInt(mousePosition.x / cellSize.x), 0,
             Mathf.RoundToInt(mousePosition.z / cellSize.z));
         Vector3 cellCenter = Vector3.Scale(cell, cellSize);
+        cellCenter.y = upLayer;
 
         return cellCenter;
     }
