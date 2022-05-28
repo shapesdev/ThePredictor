@@ -65,7 +65,8 @@ MonoBehaviour:
       buttons: []
       buttonOffset: 0
   cellSize: {x: 2, y: 0, z: 2}
-  gridSize: {x: 10, y: 10}
+  gridSize: {x: 11, y: 11}
+  upLayer: 1
   categoryIndex: -1
   selectionIndex: -1
   selectionPage: 0
