@@ -18,6 +18,7 @@ public class GameBoard : MonoBehaviour
     private bool showPaths, showGrid;
 
     Queue<GameTile> searchFrontier = new Queue<GameTile>();
+    List<GameTile> spawnPoints = new List<GameTile>();
 
     public bool ShowPaths {
         get => showPaths;
@@ -49,6 +50,12 @@ public class GameBoard : MonoBehaviour
                 m.mainTexture = null;
             }
         }
+    }
+
+    public int SpawnPointCount => spawnPoints.Count;
+
+    public GameTile GetSpawnPoint(int index) {
+        return spawnPoints[index];
     }
 
     public void Init(Vector2Int size, GameTileContentFactory contentFactory) {
@@ -83,6 +90,19 @@ public class GameBoard : MonoBehaviour
             }
         }
         ToggleDestination(tiles[tiles.Length / 2]);
+        ToggleSpawnPont(tiles[0]);
+    }
+
+    public void ToggleSpawnPont(GameTile tile) {
+        if(tile.Content.Type == GameTileContentType.SpawnPoint) {
+            if(spawnPoints.Count > 1) {
+                tile.Content = contentFactory.Get(GameTileContentType.Empty);
+            }
+        }
+        else if(tile.Content.Type == GameTileContentType.Empty) {
+            tile.Content = contentFactory.Get(GameTileContentType.SpawnPoint);
+            spawnPoints.Add(tile);
+        }
     }
 
     public void ToggleDestination(GameTile tile) {
