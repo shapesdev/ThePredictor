@@ -1,7 +1,7 @@
 ﻿
-public enum GridType
+public enum GameTileContentType
 {
-
+    Empty, Destination, Wall, SpawnPoint
 }
 
 public enum PhaseMode
